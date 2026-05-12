@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Permission Required | CodeTrack AI{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-2xl card">
+  <h1 class="mb-3 text-3xl font-bold">Permission required</h1>
+  <p class="text-slate-700">Your account does not have access to this page.</p>
+  <a class="mt-4 inline-block" href="{% url 'dashboard' %}">Return to dashboard</a>
+</section>
+{% endblock %}

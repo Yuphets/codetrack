@@ -108,7 +108,20 @@ CodeTrack AI is a Django 4.2 web application for tracking coding progress, pract
    SECURE_SSL_REDIRECT=True
    ```
 
-   On Vercel, also make sure `DEBUG=False` is set in Project Settings. The app automatically accepts Vercel-provided `VERCEL_URL`, `VERCEL_BRANCH_URL`, and `VERCEL_PROJECT_PRODUCTION_URL`, but keeping your production domain in `ALLOWED_HOSTS` is still recommended.
+   On Vercel, make sure `DATABASE_URL` is the Neon pooled PostgreSQL URL, not a localhost placeholder. If you imported Neon variables through the Vercel integration, `POSTGRES_URL` also works; the app will use it if `DATABASE_URL` still points at localhost.
+
+   Recommended Vercel values:
+
+   ```env
+   DEBUG=False
+   ALLOWED_HOSTS=codetrack-orpin.vercel.app
+   CSRF_TRUSTED_ORIGINS=https://codetrack-orpin.vercel.app
+   DATABASE_URL=<your Neon pooled connection string with sslmode=require>
+   DB_CONN_MAX_AGE=0
+   DB_CONN_HEALTH_CHECKS=True
+   ```
+
+   The app automatically accepts Vercel-provided `VERCEL_URL`, `VERCEL_BRANCH_URL`, and `VERCEL_PROJECT_PRODUCTION_URL`, but keeping your production domain in `ALLOWED_HOSTS` is still recommended.
 
 2. Install requirements on the server:
 
@@ -121,6 +134,20 @@ CodeTrack AI is a Django 4.2 web application for tracking coding progress, pract
    ```bash
    python manage.py migrate
    python manage.py collectstatic --noinput
+   ```
+
+   For Vercel plus Neon, run migrations against Neon from your local machine before or after deployment:
+
+   ```powershell
+   $env:DATABASE_URL="<your Neon pooled connection string>"
+   python manage.py migrate
+   python manage.py seed_demo
+   ```
+
+   Then verify the deployed database connection:
+
+   ```text
+   https://codetrack-orpin.vercel.app/healthz/
    ```
 
 4. Serve with a WSGI server such as Gunicorn:

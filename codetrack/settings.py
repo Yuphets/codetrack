@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 import dj_database_url
+from django.core.exceptions import ImproperlyConfigured
 from decouple import config, Csv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,6 +22,33 @@ def vercel_hosts():
         if value:
             hosts.append(value.removeprefix("https://").removeprefix("http://").rstrip("/"))
     return hosts
+
+
+def is_vercel_runtime():
+    return bool(os.environ.get("VERCEL") or os.environ.get("VERCEL_URL"))
+
+
+def database_url():
+    default_sqlite = f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
+    primary = config("DATABASE_URL", default="")
+    fallbacks = [
+        config("POSTGRES_URL", default=""),
+        config("POSTGRES_PRISMA_URL", default=""),
+        config("POSTGRES_URL_NON_POOLING", default=""),
+        config("DATABASE_URL_UNPOOLED", default=""),
+    ]
+    local_placeholder = "localhost" in primary or "127.0.0.1" in primary or "user:pass@" in primary
+    if primary and not (is_vercel_runtime() and local_placeholder):
+        return primary
+    for candidate in fallbacks:
+        if candidate:
+            return candidate
+    if is_vercel_runtime():
+        raise ImproperlyConfigured(
+            "A production PostgreSQL connection string is required. Set DATABASE_URL "
+            "or POSTGRES_URL in Vercel Environment Variables."
+        )
+    return primary or default_sqlite
 
 
 SECRET_KEY = config("SECRET_KEY", default="change-me-in-production")
@@ -80,14 +108,17 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'codetrack.wsgi.application'
 
-DATABASE_URL = config("DATABASE_URL", default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}")
+DATABASE_URL = database_url()
 DATABASES = {
     "default": dj_database_url.parse(
         DATABASE_URL,
-        conn_max_age=config("DB_CONN_MAX_AGE", default=600, cast=int),
+        conn_max_age=config("DB_CONN_MAX_AGE", default=0 if is_vercel_runtime() else 600, cast=int),
         ssl_require=config("DB_SSL_REQUIRE", default=False, cast=env_bool),
     )
 }
+if "pooler." in DATABASE_URL or "-pooler." in DATABASE_URL:
+    DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = True
+DATABASES["default"]["CONN_HEALTH_CHECKS"] = config("DB_CONN_HEALTH_CHECKS", default=True, cast=env_bool)
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -140,6 +171,8 @@ SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = False
 SECURE_BROWSER_XSS_FILTER = True
 X_FRAME_OPTIONS = 'DENY'
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = config("USE_X_FORWARDED_HOST", default=is_vercel_runtime(), cast=env_bool)
 
 if not DEBUG:
     SECURE_SSL_REDIRECT = config("SECURE_SSL_REDIRECT", default=True, cast=env_bool)
