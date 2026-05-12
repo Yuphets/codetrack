@@ -1,12 +1,39 @@
 {% extends "base.html" %}
-{% block title %}Register | CodeTrack AI{% endblock %}
+{% block title %}Create Account | CodeTrack AI{% endblock %}
+{% block main_class %}auth-shell{% endblock %}
 {% block content %}
-<section class="mx-auto max-w-2xl card">
-  <h1 class="mb-4 text-2xl font-bold">Create Student Account</h1>
-  <form method="post" class="grid gap-3">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Create account</button>
-  </form>
+<section class="auth-layout wide">
+  <div class="auth-copy">
+    <p class="text-sm font-bold uppercase tracking-wide text-teal-700">Student registration</p>
+    <h1>Start tracking your coding growth</h1>
+    <p>Create a student account to solve practice problems, submit outputs, take quizzes, earn badges, and see your improvement over time.</p>
+    <div class="auth-points">
+      <span>Python, Java, C++, PHP</span>
+      <span>Streaks and scores</span>
+      <span>Badges and leaderboard</span>
+    </div>
+  </div>
+  <div class="auth-card register-card">
+    <h2>Create student account</h2>
+    <p class="mb-6 text-sm text-slate-600">Use your school details so instructors can monitor section progress.</p>
+    <form method="post" class="grid gap-4 md:grid-cols-2">
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+        <div class="form-error md:col-span-2">{{ form.non_field_errors }}</div>
+      {% endif %}
+      {% for field in form %}
+        <div class="{% if field.name == 'password1' or field.name == 'password2' %}md:col-span-1{% endif %}">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}<p class="field-help">{{ field.help_text|safe }}</p>{% endif %}
+          {% for error in field.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+        </div>
+      {% endfor %}
+      <div class="md:col-span-2">
+        <button class="w-full" type="submit">Create account</button>
+      </div>
+    </form>
+    <p class="mt-5 text-center text-sm text-slate-600">Already registered? <a href="{% url 'login' %}">Login instead</a></p>
+  </div>
 </section>
 {% endblock %}

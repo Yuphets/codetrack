@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}CodeTrack AI | Coding Progress and Analytics{% endblock %}
+{% block main_class %}bg-white{% endblock %}
+{% block content %}
+<section class="hero-band">
+  <div class="mx-auto grid max-w-7xl gap-10 px-4 py-14 lg:grid-cols-[1.05fr_.95fr] lg:items-center">
+    <div>
+      <p class="mb-4 text-sm font-bold uppercase tracking-wide text-teal-700">Intelligent coding progress for classrooms</p>
+      <h1 class="max-w-3xl text-4xl font-black leading-tight text-slate-950 md:text-6xl">CodeTrack AI</h1>
+      <p class="mt-5 max-w-2xl text-lg leading-8 text-slate-700">
+        A focused learning platform for IT and Computer Science students to practice coding, take assessments, earn achievements, and help instructors see where a class is improving or getting stuck.
+      </p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a class="btn large" href="{% url 'register' %}">Create student account</a>
+        <a class="btn secondary large" href="{% url 'login' %}">Instructor login</a>
+      </div>
+      <div class="mt-8 grid max-w-2xl gap-3 sm:grid-cols-3">
+        <div class="mini-stat"><strong>4</strong><span>Languages</span></div>
+        <div class="mini-stat"><strong>Live</strong><span>Progress metrics</span></div>
+        <div class="mini-stat"><strong>PDF</strong><span>Class reports</span></div>
+      </div>
+    </div>
+    <div class="product-panel">
+      <div class="panel-header">
+        <span></span><span></span><span></span>
+      </div>
+      <div class="grid gap-4 md:grid-cols-2">
+        <div class="metric-tile">
+          <p>Coding streak</p>
+          <strong>12 days</strong>
+        </div>
+        <div class="metric-tile">
+          <p>Accuracy</p>
+          <strong>84%</strong>
+        </div>
+        <div class="md:col-span-2 rounded-md border border-slate-200 bg-slate-950 p-4 font-mono text-sm text-slate-100">
+          <p><span class="text-teal-300">def</span> solve(topic):</p>
+          <p class="pl-4">practice.track("arrays")</p>
+          <p class="pl-4">return progress.improve()</p>
+        </div>
+        <div class="topic-chip">Loops</div>
+        <div class="topic-chip">Algorithms</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="mx-auto max-w-7xl px-4 py-14">
+  <div class="mb-8 max-w-3xl">
+    <h2 class="text-3xl font-bold">Built for repeated classroom workflows</h2>
+    <p class="mt-3 text-slate-600">Students get a clean practice loop. Instructors get enough analytics to make better teaching decisions without turning the system into a spreadsheet maze.</p>
+  </div>
+  <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <article class="feature-card">
+      <h3>Practice Problems</h3>
+      <p>Organize problems by Loops, Arrays, OOP, and Algorithms with difficulty, points, sample input, and expected output.</p>
+    </article>
+    <article class="feature-card">
+      <h3>Browser Code Editor</h3>
+      <p>Students write solutions in a polished Ace editor with Python, Java, C++, and PHP modes.</p>
+    </article>
+    <article class="feature-card">
+      <h3>Quizzes and Assessments</h3>
+      <p>Run topic-based quizzes, capture attempts, and show answer feedback after submission.</p>
+    </article>
+    <article class="feature-card">
+      <h3>Achievements</h3>
+      <p>Reward progress with badges such as Problem Solver, Code Warrior, and Algorithm Master.</p>
+    </article>
+    <article class="feature-card">
+      <h3>Instructor Analytics</h3>
+      <p>Review class trends, difficult topics, leaderboard activity, accuracy, and improvement signals.</p>
+    </article>
+    <article class="feature-card">
+      <h3>PDF Reports</h3>
+      <p>Generate section-based student progress reports for instructors and administrators.</p>
+    </article>
+  </div>
+</section>
+
+<section class="border-y border-slate-200 bg-slate-50">
+  <div class="mx-auto grid max-w-7xl gap-8 px-4 py-12 md:grid-cols-3">
+    <div>
+      <h2 class="text-2xl font-bold">Students</h2>
+      <p class="mt-2 text-slate-600">Practice consistently, check progress, take quizzes, and climb the leaderboard.</p>
+    </div>
+    <div>
+      <h2 class="text-2xl font-bold">Instructors</h2>
+      <p class="mt-2 text-slate-600">Manage content, monitor performance, announce updates, and export reports.</p>
+    </div>
+    <div>
+      <h2 class="text-2xl font-bold">Admins</h2>
+      <p class="mt-2 text-slate-600">Use Django’s admin tools with role-aware access across the application.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

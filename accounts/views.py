@@ -1,7 +1,9 @@
 from django.contrib import messages
 from django.contrib.auth import login
+from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.db import DatabaseError, OperationalError, ProgrammingError
 from django.db.models import Avg, Count, Q
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
@@ -13,14 +15,41 @@ from .forms import ProfileForm, RegistrationForm
 from .services import leaderboard, student_metrics
 
 
+DATABASE_SETUP_MESSAGE = (
+    "CodeTrack AI can open the site, but the database is not ready for account changes yet. "
+    "Please run migrations against the production database, then try again."
+)
+
+
+def landing(request):
+    if request.user.is_authenticated:
+        return redirect("dashboard")
+    return render(request, "accounts/landing.html")
+
+
+class CodeTrackLoginView(auth_views.LoginView):
+    template_name = "registration/login.html"
+
+    def post(self, request, *args, **kwargs):
+        try:
+            return super().post(request, *args, **kwargs)
+        except (DatabaseError, OperationalError, ProgrammingError):
+            messages.error(request, DATABASE_SETUP_MESSAGE)
+            return render(request, self.template_name, {"form": self.get_form()}, status=503)
+
+
 def register(request):
     if request.method == "POST":
         form = RegistrationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            messages.success(request, "Welcome to CodeTrack AI. Your student account is ready.")
-            return redirect("dashboard")
+        try:
+            if form.is_valid():
+                user = form.save()
+                login(request, user)
+                messages.success(request, "Welcome to CodeTrack AI. Your student account is ready.")
+                return redirect("dashboard")
+        except (DatabaseError, OperationalError, ProgrammingError):
+            messages.error(request, DATABASE_SETUP_MESSAGE)
+            return render(request, "registration/register.html", {"form": form}, status=503)
     else:
         form = RegistrationForm()
     return render(request, "registration/register.html", {"form": form})

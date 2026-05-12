@@ -5,16 +5,21 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}CodeTrack AI{% endblock %}</title>
+  <meta name="description" content="CodeTrack AI helps IT and Computer Science classes measure coding practice, quizzes, achievements, and progress analytics.">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
 </head>
-<body class="bg-slate-50 text-slate-900">
-  <nav class="border-b bg-white">
+<body class="bg-slate-50 text-slate-950">
+  <nav class="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
     <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
-      <a href="{% url 'dashboard' %}" class="text-lg font-semibold">CodeTrack AI</a>
-      <div class="flex flex-wrap items-center gap-3 text-sm">
+      <a href="{% url 'landing' %}" class="flex items-center gap-2 text-lg font-bold text-slate-950">
+        <span class="grid h-9 w-9 place-items-center rounded-md bg-teal-700 text-white">CT</span>
+        <span>CodeTrack AI</span>
+      </a>
+      <div class="flex flex-wrap items-center gap-4 text-sm">
         {% if user.is_authenticated %}
+          <a href="{% url 'dashboard' %}">Dashboard</a>
           <a href="{% url 'problem_list' %}">Problems</a>
           <a href="{% url 'quiz_list' %}">Quizzes</a>
           <a href="{% url 'leaderboard' %}">Leaderboard</a>
@@ -24,17 +29,17 @@
             <a href="{% url 'report_center' %}">Reports</a>
           {% endif %}
           <a href="{% url 'profile' %}">Profile</a>
-          <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button>Logout</button></form>
+          <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="btn secondary compact">Logout</button></form>
         {% else %}
           <a href="{% url 'login' %}">Login</a>
-          <a class="btn" href="{% url 'register' %}">Register</a>
+          <a class="btn compact" href="{% url 'register' %}">Register</a>
         {% endif %}
       </div>
     </div>
   </nav>
-  <main class="mx-auto max-w-7xl px-4 py-6">
+  <main class="{% block main_class %}mx-auto max-w-7xl px-4 py-6{% endblock %}">
     {% for message in messages %}
-      <div class="mb-4 rounded-md border bg-white p-3 text-sm">{{ message }}</div>
+      <div class="mx-auto mb-4 max-w-7xl rounded-md border border-teal-200 bg-teal-50 p-3 text-sm text-teal-950">{{ message }}</div>
     {% endfor %}
     {% block content %}{% endblock %}
   </main>
