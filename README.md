@@ -100,8 +100,8 @@ CodeTrack AI is a Django 4.2 web application for tracking coding progress, pract
    ```env
    SECRET_KEY=<strong-secret>
    DEBUG=False
-   ALLOWED_HOSTS=your-domain.com,codetrack-orpin.vercel.app
-   CSRF_TRUSTED_ORIGINS=https://your-domain.com,https://codetrack-orpin.vercel.app
+   ALLOWED_HOSTS=your-domain.com,codetrack-bay.vercel.app
+   CSRF_TRUSTED_ORIGINS=https://your-domain.com,https://codetrack-bay.vercel.app
    DATABASE_URL=postgresql://USER:PASSWORD@HOST:5432/DATABASE
    DB_CONN_MAX_AGE=600
    DB_SSL_REQUIRE=True
@@ -114,8 +114,8 @@ CodeTrack AI is a Django 4.2 web application for tracking coding progress, pract
 
    ```env
    DEBUG=False
-   ALLOWED_HOSTS=codetrack-orpin.vercel.app
-   CSRF_TRUSTED_ORIGINS=https://codetrack-orpin.vercel.app
+   ALLOWED_HOSTS=codetrack-bay.vercel.app
+   CSRF_TRUSTED_ORIGINS=https://codetrack-bay.vercel.app
    DATABASE_URL=<your Neon pooled connection string with sslmode=require>
    DB_CONN_MAX_AGE=0
    DB_CONN_HEALTH_CHECKS=True
@@ -147,7 +147,7 @@ CodeTrack AI is a Django 4.2 web application for tracking coding progress, pract
    Then verify the deployed database connection:
 
    ```text
-   https://codetrack-orpin.vercel.app/healthz/
+   https://codetrack-bay.vercel.app/healthz/
    ```
 
 4. Serve with a WSGI server such as Gunicorn:

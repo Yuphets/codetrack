@@ -37,8 +37,10 @@ def database_url():
         config("POSTGRES_URL_NON_POOLING", default=""),
         config("DATABASE_URL_UNPOOLED", default=""),
     ]
+    sqlite_url = primary.startswith("sqlite:")
     local_placeholder = "localhost" in primary or "127.0.0.1" in primary or "user:pass@" in primary
-    if primary and not (is_vercel_runtime() and local_placeholder):
+    invalid_vercel_database = is_vercel_runtime() and (sqlite_url or local_placeholder)
+    if primary and not invalid_vercel_database:
         return primary
     for candidate in fallbacks:
         if candidate:
@@ -53,6 +55,8 @@ def database_url():
 
 SECRET_KEY = config("SECRET_KEY", default="change-me-in-production")
 DEBUG = config("DEBUG", default=False, cast=env_bool)
+if is_vercel_runtime() and "DEBUG" not in os.environ:
+    DEBUG = False
 ALLOWED_HOSTS = sorted(set(csv_env("ALLOWED_HOSTS", "localhost,127.0.0.1") + vercel_hosts()))
 CSRF_TRUSTED_ORIGINS = sorted(
     set(
