@@ -100,13 +100,15 @@ CodeTrack AI is a Django 4.2 web application for tracking coding progress, pract
    ```env
    SECRET_KEY=<strong-secret>
    DEBUG=False
-   ALLOWED_HOSTS=your-domain.com
-   CSRF_TRUSTED_ORIGINS=https://your-domain.com
+   ALLOWED_HOSTS=your-domain.com,codetrack-orpin.vercel.app
+   CSRF_TRUSTED_ORIGINS=https://your-domain.com,https://codetrack-orpin.vercel.app
    DATABASE_URL=postgresql://USER:PASSWORD@HOST:5432/DATABASE
    DB_CONN_MAX_AGE=600
    DB_SSL_REQUIRE=True
    SECURE_SSL_REDIRECT=True
    ```
+
+   On Vercel, also make sure `DEBUG=False` is set in Project Settings. The app automatically accepts Vercel-provided `VERCEL_URL`, `VERCEL_BRANCH_URL`, and `VERCEL_PROJECT_PRODUCTION_URL`, but keeping your production domain in `ALLOWED_HOSTS` is still recommended.
 
 2. Install requirements on the server:
 

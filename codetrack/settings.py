@@ -10,10 +10,28 @@ def env_bool(value):
     return str(value).strip().lower() in {"1", "true", "yes", "on"}
 
 
+def csv_env(name, default=""):
+    return [item.strip() for item in config(name, default=default, cast=Csv()) if item.strip()]
+
+
+def vercel_hosts():
+    hosts = []
+    for name in ("VERCEL_URL", "VERCEL_BRANCH_URL", "VERCEL_PROJECT_PRODUCTION_URL"):
+        value = os.environ.get(name, "").strip()
+        if value:
+            hosts.append(value.removeprefix("https://").removeprefix("http://").rstrip("/"))
+    return hosts
+
+
 SECRET_KEY = config("SECRET_KEY", default="change-me-in-production")
 DEBUG = config("DEBUG", default=False, cast=env_bool)
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost,127.0.0.1", cast=Csv())
-CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", default="", cast=Csv())
+ALLOWED_HOSTS = sorted(set(csv_env("ALLOWED_HOSTS", "localhost,127.0.0.1") + vercel_hosts()))
+CSRF_TRUSTED_ORIGINS = sorted(
+    set(
+        csv_env("CSRF_TRUSTED_ORIGINS")
+        + [f"https://{host}" for host in ALLOWED_HOSTS if host.endswith(".vercel.app")]
+    )
+)
 
 INSTALLED_APPS = [
     'django.contrib.admin',
