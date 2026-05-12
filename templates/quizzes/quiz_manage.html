@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+  <h1 class="text-3xl font-bold">Quiz Management</h1>
+  <div class="flex gap-2"><a class="btn" href="{% url 'quiz_create' %}">New Quiz</a><a class="btn secondary" href="{% url 'question_create' %}">New Question</a></div>
+</div>
+<section class="grid gap-4 lg:grid-cols-2">
+  <div class="card">
+    <h2 class="mb-3 text-xl font-semibold">Quizzes</h2>
+    {% for quiz in quizzes %}<div class="flex justify-between border-b py-2"><span>{{ quiz.title }}</span><a href="{% url 'quiz_edit' quiz.pk %}">Edit</a></div>{% endfor %}
+  </div>
+  <div class="card">
+    <h2 class="mb-3 text-xl font-semibold">Questions</h2>
+    {% for question in questions %}<div class="flex justify-between border-b py-2 text-sm"><span>{{ question.quiz.title }} · {{ question.prompt|truncatechars:50 }}</span><a href="{% url 'question_edit' question.pk %}">Edit</a></div>{% endfor %}
+  </div>
+</section>
+{% endblock %}

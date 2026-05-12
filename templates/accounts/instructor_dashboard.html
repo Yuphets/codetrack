@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+  <div>
+    <h1 class="text-3xl font-bold">Instructor Dashboard</h1>
+    <p class="text-slate-600">Monitor student performance, difficult topics, and class progress.</p>
+  </div>
+  <div class="flex gap-2">
+    <a class="btn" href="{% url 'problem_manage' %}">Manage Problems</a>
+    <a class="btn secondary" href="{% url 'quiz_manage' %}">Manage Quizzes</a>
+  </div>
+</div>
+<section class="grid gap-4 md:grid-cols-5">
+  <div class="card"><p>Students</p><p class="metric">{{ student_count }}</p></div>
+  <div class="card"><p>Problems</p><p class="metric">{{ problem_count }}</p></div>
+  <div class="card"><p>Submissions</p><p class="metric">{{ submission_count }}</p></div>
+  <div class="card"><p>Accuracy</p><p class="metric">{{ accuracy }}%</p></div>
+  <div class="card"><p>Quiz Avg</p><p class="metric">{{ quiz_average }}</p></div>
+</section>
+<section class="mt-6 grid gap-4 lg:grid-cols-2">
+  <div class="card">
+    <h2 class="mb-3 text-xl font-semibold">Difficult Topics</h2>
+    <canvas id="topicChart" height="140"></canvas>
+  </div>
+  <div class="card">
+    <h2 class="mb-3 text-xl font-semibold">Leaderboard</h2>
+    {% for leader in leaders %}
+      <div class="flex justify-between border-b py-2"><span>{{ leader.get_full_name|default:leader.username }}</span><strong>{{ leader.score|default:0 }} pts</strong></div>
+    {% empty %}<p>No student activity yet.</p>{% endfor %}
+  </div>
+</section>
+{{ difficult_topics|json_script:"topic-data" }}
+<script>
+const rows = JSON.parse(document.getElementById("topic-data").textContent);
+new Chart(document.getElementById("topicChart"), {
+  type: "bar",
+  data: { labels: rows.map(r => r.topic), datasets: [{ label: "Attempts", data: rows.map(r => r.attempts), backgroundColor: "#0f766e" }, { label: "Accepted", data: rows.map(r => r.accepted), backgroundColor: "#64748b" }] }
+});
+</script>
+{% endblock %}

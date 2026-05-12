@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="mb-4 flex items-center justify-between">
+  <h1 class="text-3xl font-bold">Announcement Management</h1>
+  <a class="btn" href="{% url 'announcement_create' %}">New Announcement</a>
+</div>
+<div class="card">
+  {% for announcement in announcements %}
+    <div class="flex justify-between border-b py-2"><span>{{ announcement.title }} · {{ announcement.get_audience_display }}</span><a href="{% url 'announcement_edit' announcement.pk %}">Edit</a></div>
+  {% endfor %}
+</div>
+{% endblock %}

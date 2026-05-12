@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="mx-auto max-w-2xl card">
+  <h1 class="mb-4 text-3xl font-bold">Reports</h1>
+  <p class="mb-4 text-slate-600">Generate PDF progress reports by section or for all students.</p>
+  <form method="get" action="{% url 'student_report_pdf' %}">
+    <label for="section">Section</label>
+    <select name="section" id="section">
+      <option value="">All sections</option>
+      {% for section in sections %}<option value="{{ section }}">{{ section }}</option>{% endfor %}
+    </select>
+    <button class="mt-3" type="submit">Download PDF</button>
+  </form>
+</section>
+{% endblock %}

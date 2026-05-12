@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="mx-auto max-w-3xl card">
+  <h1 class="text-3xl font-bold">{{ attempt.quiz.title }} Result</h1>
+  <p class="mb-4 text-xl">Score: {{ attempt.score }}/{{ attempt.total }} ({{ attempt.percentage }}%)</p>
+  {% for answer in attempt.answers.all %}
+    <article class="mb-4 rounded border p-3">
+      <h2 class="font-semibold">{{ answer.question.prompt }}</h2>
+      <p>Your answer: {{ answer.selected_choice }} · {% if answer.is_correct %}Correct{% else %}Incorrect{% endif %}</p>
+      {% if answer.question.explanation %}<p class="text-sm text-slate-600">{{ answer.question.explanation }}</p>{% endif %}
+    </article>
+  {% endfor %}
+</section>
+{% endblock %}

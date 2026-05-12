@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="mx-auto max-w-2xl card">
+  <h1 class="mb-4 text-2xl font-bold">{% if announcement %}Edit{% else %}New{% endif %} Announcement</h1>
+  <form method="post">{% csrf_token %}{{ form.as_p }}<button type="submit">Save announcement</button></form>
+</section>
+{% endblock %}

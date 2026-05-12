@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="mb-4 text-3xl font-bold">Performance Analytics</h1>
+<section class="grid gap-4 lg:grid-cols-2">
+  <div class="card"><h2 class="mb-3 text-xl font-semibold">Topic Accuracy</h2><canvas id="topicChart"></canvas></div>
+  <div class="card"><h2 class="mb-3 text-xl font-semibold">Submission Trend</h2><canvas id="trendChart"></canvas></div>
+</section>
+<section class="card mt-6 overflow-x-auto">
+  <h2 class="mb-3 text-xl font-semibold">Student Monitoring</h2>
+  <table class="w-full text-sm">
+    <tr class="border-b text-left"><th>Student</th><th>Section</th><th>Solved</th><th>Attempts</th><th>Accuracy</th></tr>
+    {% for student in students %}
+      <tr class="border-b"><td>{{ student.get_full_name|default:student.username }}</td><td>{{ student.profile.section }}</td><td>{{ student.solved }}</td><td>{{ student.attempts }}</td><td>{% widthratio student.solved student.attempts 100 %}%</td></tr>
+    {% endfor %}
+  </table>
+</section>
+{{ topics|json_script:"topics" }}
+{{ trend|json_script:"trend" }}
+<script>
+const topics = JSON.parse(document.getElementById("topics").textContent);
+const trend = JSON.parse(document.getElementById("trend").textContent);
+new Chart(document.getElementById("topicChart"), { type: "bar", data: { labels: topics.map(t => t.topic), datasets: [{ label: "Attempts", data: topics.map(t => t.attempts), backgroundColor: "#0f766e" }, { label: "Accepted", data: topics.map(t => t.accepted), backgroundColor: "#475569" }] } });
+new Chart(document.getElementById("trendChart"), { type: "line", data: { labels: trend.map(t => t.day), datasets: [{ label: "Submissions", data: trend.map(t => t.total), borderColor: "#0f766e" }, { label: "Accepted", data: trend.map(t => t.accepted), borderColor: "#475569" }] } });
+</script>
+{% endblock %}

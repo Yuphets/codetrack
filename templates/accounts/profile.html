@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="mx-auto max-w-2xl card">
+  <h1 class="mb-4 text-2xl font-bold">Profile</h1>
+  <p class="mb-3 text-sm text-slate-600">Role: {{ user.profile.get_role_display }}</p>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save profile</button>
+  </form>
+</section>
+{% endblock %}

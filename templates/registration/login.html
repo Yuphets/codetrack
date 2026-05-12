@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Login | CodeTrack AI{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-md card">
+  <h1 class="mb-4 text-2xl font-bold">Login</h1>
+  <form method="post" class="space-y-3">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Login</button>
+  </form>
+  <p class="mt-4 text-sm">No account yet? <a href="{% url 'register' %}">Create a student account</a>.</p>
+</section>
+{% endblock %}

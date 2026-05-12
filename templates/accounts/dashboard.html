@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="mb-6">
+  <h1 class="text-3xl font-bold">Student Dashboard</h1>
+  <p class="text-slate-600">Track coding practice, assessments, streaks, and achievements.</p>
+</div>
+<section class="grid gap-4 md:grid-cols-5">
+  <div class="card"><p>Solved</p><p class="metric">{{ metrics.solved }}</p></div>
+  <div class="card"><p>Attempted</p><p class="metric">{{ metrics.attempted }}</p></div>
+  <div class="card"><p>Accuracy</p><p class="metric">{{ metrics.accuracy }}%</p></div>
+  <div class="card"><p>Score</p><p class="metric">{{ metrics.score }}</p></div>
+  <div class="card"><p>Streak</p><p class="metric">{{ metrics.streak }} days</p></div>
+</section>
+<section class="mt-6 grid gap-4 lg:grid-cols-3">
+  <div class="card lg:col-span-2">
+    <h2 class="mb-3 text-xl font-semibold">Recent Submissions</h2>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <tr class="border-b text-left"><th>Problem</th><th>Status</th><th>Score</th><th>Date</th></tr>
+        {% for item in recent_submissions %}
+          <tr class="border-b"><td>{{ item.problem.title }}</td><td>{{ item.get_status_display }}</td><td>{{ item.score }}</td><td>{{ item.submitted_at|date:"M d, Y H:i" }}</td></tr>
+        {% empty %}<tr><td colspan="4" class="py-3">No submissions yet.</td></tr>{% endfor %}
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <h2 class="mb-3 text-xl font-semibold">Achievements</h2>
+    {% for earned in achievements %}
+      <div class="mb-3 rounded border p-3"><strong>{{ earned.achievement.name }}</strong><p class="text-sm text-slate-600">{{ earned.achievement.description }}</p></div>
+    {% empty %}<p>Earn badges by solving problems.</p>{% endfor %}
+  </div>
+</section>
+<section class="mt-6 grid gap-4 lg:grid-cols-2">
+  <div class="card">
+    <h2 class="mb-3 text-xl font-semibold">Announcements</h2>
+    {% for announcement in announcements %}
+      <article class="mb-3 border-b pb-3"><h3 class="font-semibold">{{ announcement.title }}</h3><p class="text-sm">{{ announcement.body }}</p></article>
+    {% empty %}<p>No announcements.</p>{% endfor %}
+  </div>
+  <div class="card">
+    <h2 class="mb-3 text-xl font-semibold">Top Students</h2>
+    {% for leader in leaders %}
+      <div class="flex justify-between border-b py-2"><span>{{ forloop.counter }}. {{ leader.get_full_name|default:leader.username }}</span><strong>{{ leader.score|default:0 }} pts</strong></div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

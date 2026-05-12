@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: Arial, sans-serif; color: #0f172a; }
+    h1 { color: #0f766e; }
+    table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    th, td { border: 1px solid #cbd5e1; padding: 8px; text-align: left; }
+    th { background: #f1f5f9; }
+  </style>
+</head>
+<body>
+  <h1>CodeTrack AI Progress Report</h1>
+  <p>Section: {{ section }}</p>
+  <h2>Student Progress</h2>
+  <table>
+    <tr><th>Student</th><th>Section</th><th>Solved</th><th>Attempts</th></tr>
+    {% for student in students %}
+      <tr><td>{{ student.get_full_name|default:student.username }}</td><td>{{ student.profile.section }}</td><td>{{ student.solved }}</td><td>{{ student.attempts }}</td></tr>
+    {% endfor %}
+  </table>
+  <h2>Topic Summary</h2>
+  <table>
+    <tr><th>Topic</th><th>Attempts</th><th>Accepted</th></tr>
+    {% for topic in topics %}
+      <tr><td>{{ topic.topic }}</td><td>{{ topic.attempts }}</td><td>{{ topic.accepted }}</td></tr>
+    {% endfor %}
+  </table>
+</body>
+</html>

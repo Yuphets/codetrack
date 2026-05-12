@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="mb-4 text-3xl font-bold">Leaderboard</h1>
+<div class="card overflow-x-auto">
+  <table class="w-full text-sm">
+    <tr class="border-b text-left"><th>Rank</th><th>Student</th><th>Solved</th><th>Score</th></tr>
+    {% for leader in leaders %}
+      <tr class="border-b"><td>{{ forloop.counter }}</td><td>{{ leader.get_full_name|default:leader.username }}</td><td>{{ leader.solved }}</td><td>{{ leader.score|default:0 }}</td></tr>
+    {% empty %}<tr><td colspan="4" class="py-3">No leaderboard data yet.</td></tr>{% endfor %}
+  </table>
+</div>
+{% endblock %}

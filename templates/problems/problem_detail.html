@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="grid gap-6 lg:grid-cols-2">
+  <section class="card">
+    <h1 class="text-3xl font-bold">{{ problem.title }}</h1>
+    <p class="mb-4 text-sm text-slate-600">{{ problem.get_topic_display }} · {{ problem.get_difficulty_display }} · {{ problem.points }} pts</p>
+    <div class="prose max-w-none whitespace-pre-wrap">{{ problem.statement }}</div>
+    {% if problem.input_format %}<h2 class="mt-4 font-semibold">Input</h2><p class="whitespace-pre-wrap">{{ problem.input_format }}</p>{% endif %}
+    {% if problem.output_format %}<h2 class="mt-4 font-semibold">Output</h2><p class="whitespace-pre-wrap">{{ problem.output_format }}</p>{% endif %}
+    <div class="mt-4 grid gap-3 md:grid-cols-2">
+      <pre class="rounded bg-slate-100 p-3 text-sm">{{ problem.sample_input }}</pre>
+      <pre class="rounded bg-slate-100 p-3 text-sm">{{ problem.sample_output }}</pre>
+    </div>
+  </section>
+  <section class="card">
+    <h2 class="mb-3 text-xl font-semibold">Submit Solution</h2>
+    <form method="post" onsubmit="syncEditor()">
+      {% csrf_token %}
+      <label for="id_language">Language</label>{{ form.language }}
+      <label for="editor">Code</label>
+      <div id="editor" class="h-80 rounded border"></div>
+      {{ form.code }}
+      <label for="id_output">Program output</label>{{ form.output }}
+      <button class="mt-3" type="submit">Submit</button>
+    </form>
+  </section>
+</div>
+<section class="card mt-6">
+  <h2 class="mb-3 text-xl font-semibold">Submission History</h2>
+  {% for submission in submissions %}
+    <div class="flex justify-between border-b py-2 text-sm"><span>{{ submission.get_language_display }} · {{ submission.get_status_display }}</span><span>{{ submission.score }} pts · {{ submission.submitted_at|date:"M d, H:i" }}</span></div>
+  {% empty %}<p>No submissions for this problem yet.</p>{% endfor %}
+</section>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.6/ace.js"></script>
+<script>
+const textarea = document.getElementById("code-field");
+textarea.style.display = "none";
+const editor = ace.edit("editor");
+editor.setTheme("ace/theme/textmate");
+editor.session.setMode("ace/mode/python");
+editor.setValue(textarea.value || "print('Hello CodeTrack')", -1);
+document.getElementById("id_language").addEventListener("change", (event) => {
+  const modes = { python: "python", java: "java", cpp: "c_cpp", php: "php" };
+  editor.session.setMode("ace/mode/" + modes[event.target.value]);
+});
+function syncEditor() { textarea.value = editor.getValue(); }
+</script>
+{% endblock %}

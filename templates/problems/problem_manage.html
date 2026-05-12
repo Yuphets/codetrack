@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="mb-4 flex items-center justify-between">
+  <h1 class="text-3xl font-bold">Problem Management</h1>
+  <a class="btn" href="{% url 'problem_create' %}">New Problem</a>
+</div>
+<div class="card overflow-x-auto">
+  <table class="w-full text-sm">
+    <tr class="border-b text-left"><th>Title</th><th>Topic</th><th>Difficulty</th><th>Active</th><th></th></tr>
+    {% for problem in problems %}
+      <tr class="border-b"><td>{{ problem.title }}</td><td>{{ problem.get_topic_display }}</td><td>{{ problem.get_difficulty_display }}</td><td>{{ problem.is_active }}</td><td><a href="{% url 'problem_edit' problem.pk %}">Edit</a></td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}
