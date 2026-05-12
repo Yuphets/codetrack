@@ -150,6 +150,8 @@ CodeTrack AI is a Django 4.2 web application for tracking coding progress, pract
    https://codetrack-bay.vercel.app/healthz/
    ```
 
+   If Vercel says it failed to read Django settings from `manage.py`, verify that this code change is deployed and that `.env` / `db.sqlite3` are not tracked in git. If `/healthz/` returns `misconfigured`, Vercel is missing `DATABASE_URL` or `POSTGRES_URL`.
+
 4. Serve with a WSGI server such as Gunicorn:
 
    ```bash

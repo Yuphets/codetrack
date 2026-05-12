@@ -1,7 +1,6 @@
 import os
 from pathlib import Path
 import dj_database_url
-from django.core.exceptions import ImproperlyConfigured
 from decouple import config, Csv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -28,8 +27,9 @@ def is_vercel_runtime():
     return bool(os.environ.get("VERCEL") or os.environ.get("VERCEL_URL"))
 
 
-def database_url():
+def database_config():
     default_sqlite = f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
+    vercel_fallback_sqlite = "sqlite:////tmp/codetrack-unconfigured.sqlite3"
     primary = config("DATABASE_URL", default="")
     fallbacks = [
         config("POSTGRES_URL", default=""),
@@ -41,16 +41,13 @@ def database_url():
     local_placeholder = "localhost" in primary or "127.0.0.1" in primary or "user:pass@" in primary
     invalid_vercel_database = is_vercel_runtime() and (sqlite_url or local_placeholder)
     if primary and not invalid_vercel_database:
-        return primary
+        return primary, True
     for candidate in fallbacks:
         if candidate:
-            return candidate
+            return candidate, True
     if is_vercel_runtime():
-        raise ImproperlyConfigured(
-            "A production PostgreSQL connection string is required. Set DATABASE_URL "
-            "or POSTGRES_URL in Vercel Environment Variables."
-        )
-    return primary or default_sqlite
+        return vercel_fallback_sqlite, False
+    return primary or default_sqlite, True
 
 
 SECRET_KEY = config("SECRET_KEY", default="change-me-in-production")
@@ -90,6 +87,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'codetrack.middleware.RequireConfiguredDatabaseMiddleware',
 ]
 
 ROOT_URLCONF = 'codetrack.urls'
@@ -112,7 +110,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'codetrack.wsgi.application'
 
-DATABASE_URL = database_url()
+DATABASE_URL, DATABASE_CONFIGURED = database_config()
 DATABASES = {
     "default": dj_database_url.parse(
         DATABASE_URL,
