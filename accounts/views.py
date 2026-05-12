@@ -6,12 +6,13 @@ from django.contrib.auth.models import User
 from django.db import DatabaseError, OperationalError, ProgrammingError
 from django.db.models import Avg, Count, Q
 from django.http import JsonResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from announcements.models import Announcement
 from problems.models import Problem, Submission
 from quizzes.models import QuizAttempt
-from .decorators import instructor_required
-from .forms import ProfileForm, RegistrationForm
+from .decorators import admin_required, instructor_required
+from .forms import ProfileForm, RegistrationForm, SectionForm, UserRoleForm
+from .models import Profile, Section
 from .services import leaderboard, student_metrics
 
 
@@ -123,6 +124,57 @@ def profile(request):
     else:
         form = ProfileForm(instance=request.user.profile)
     return render(request, "accounts/profile.html", {"form": form})
+
+
+@instructor_required
+def section_manage(request):
+    profile = request.user.profile
+    sections = Section.objects.select_related("instructor").prefetch_related("students__user")
+    if not profile.is_admin_like:
+        sections = sections.filter(instructor=request.user)
+    return render(request, "accounts/section_manage.html", {"sections": sections})
+
+
+@instructor_required
+def section_edit(request, pk=None):
+    profile = request.user.profile
+    if pk:
+        queryset = Section.objects.all() if profile.is_admin_like else Section.objects.filter(instructor=request.user)
+        section = get_object_or_404(queryset, pk=pk)
+    else:
+        section = None
+    if request.method == "POST":
+        form = SectionForm(request.POST, instance=section)
+        if form.is_valid():
+            item = form.save(commit=False)
+            if not item.instructor_id:
+                item.instructor = request.user
+            item.save()
+            messages.success(request, "Section saved.")
+            return redirect("section_manage")
+    else:
+        form = SectionForm(instance=section)
+    return render(request, "accounts/section_form.html", {"form": form, "section": section})
+
+
+@admin_required
+def user_manage(request):
+    users = User.objects.select_related("profile", "profile__section_ref").order_by("profile__role", "last_name", "username")
+    return render(request, "accounts/user_manage.html", {"users": users})
+
+
+@admin_required
+def user_role_edit(request, pk):
+    target = get_object_or_404(User.objects.select_related("profile"), pk=pk)
+    if request.method == "POST":
+        form = UserRoleForm(request.POST, instance=target)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"{target.username} was updated.")
+            return redirect("user_manage")
+    else:
+        form = UserRoleForm(instance=target)
+    return render(request, "accounts/user_role_form.html", {"form": form, "target": target})
 
 
 @login_required

@@ -1,17 +1,25 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="mx-auto max-w-3xl card">
-  <h1 class="mb-2 text-3xl font-bold">{{ quiz.title }}</h1>
-  <p class="mb-4 text-slate-600">{{ quiz.description }}</p>
-  <form method="post">
+<section class="mx-auto max-w-4xl">
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow">Assessment</p>
+      <h1>{{ quiz.title }}</h1>
+      <p>{{ quiz.description }}</p>
+    </div>
+    <span class="status-pill good">{{ questions|length }} questions</span>
+  </div>
+  <form method="post" class="grid gap-4">
     {% csrf_token %}
     {% for question in questions %}
-      <fieldset class="mb-5 border-b pb-4">
-        <legend class="mb-2 font-semibold">{{ forloop.counter }}. {{ question.prompt }}</legend>
-        <label><input class="mr-2 inline w-auto" type="radio" name="question_{{ question.id }}" value="A" required> {{ question.choice_a }}</label>
-        <label><input class="mr-2 inline w-auto" type="radio" name="question_{{ question.id }}" value="B"> {{ question.choice_b }}</label>
-        <label><input class="mr-2 inline w-auto" type="radio" name="question_{{ question.id }}" value="C"> {{ question.choice_c }}</label>
-        <label><input class="mr-2 inline w-auto" type="radio" name="question_{{ question.id }}" value="D"> {{ question.choice_d }}</label>
+      <fieldset class="card elevated">
+        <legend class="mb-4 text-lg font-black">{{ forloop.counter }}. {{ question.prompt }}</legend>
+        <div class="grid gap-3">
+          <label class="choice-row"><input type="radio" name="question_{{ question.id }}" value="A" required><span>A</span>{{ question.choice_a }}</label>
+          <label class="choice-row"><input type="radio" name="question_{{ question.id }}" value="B"><span>B</span>{{ question.choice_b }}</label>
+          <label class="choice-row"><input type="radio" name="question_{{ question.id }}" value="C"><span>C</span>{{ question.choice_c }}</label>
+          <label class="choice-row"><input type="radio" name="question_{{ question.id }}" value="D"><span>D</span>{{ question.choice_d }}</label>
+        </div>
       </fieldset>
     {% endfor %}
     <button type="submit">Submit quiz</button>

@@ -1,17 +1,26 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="mb-4 flex items-center justify-between">
-  <h1 class="text-3xl font-bold">Quizzes</h1>
-  {% if user.profile.is_instructor_like %}<a class="btn" href="{% url 'quiz_manage' %}">Manage Quizzes</a>{% endif %}
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">Assessment center</p>
+    <h1>Quizzes</h1>
+    <p>Check your understanding with short topic-based assessments.</p>
+  </div>
+  {% if user.profile.is_instructor_like %}<a class="btn" href="{% url 'quiz_manage' %}">Manage quizzes</a>{% endif %}
 </div>
-<section class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+<section class="content-grid">
   {% for quiz in quizzes %}
-    <article class="card">
-      <h2 class="font-semibold">{{ quiz.title }}</h2>
-      <p class="text-sm text-slate-600">{{ quiz.topic }} · {{ quiz.questions.count }} questions</p>
-      <p class="my-3 text-sm">{{ quiz.description }}</p>
-      <a href="{% url 'quiz_take' quiz.pk %}">Take quiz</a>
+    <article class="practice-card">
+      <span class="status-pill">{{ quiz.topic }}</span>
+      <h2>{{ quiz.title }}</h2>
+      <p>{{ quiz.description|default:"No description provided." }}</p>
+      <div class="mt-4 flex items-center justify-between">
+        <span class="text-sm text-slate-500">{{ quiz.questions.count }} questions</span>
+        <a href="{% url 'quiz_take' quiz.pk %}">Take quiz</a>
+      </div>
     </article>
-  {% empty %}<p>No active quizzes yet.</p>{% endfor %}
+  {% empty %}
+    <div class="empty-state">No active quizzes yet.</div>
+  {% endfor %}
 </section>
 {% endblock %}

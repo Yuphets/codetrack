@@ -22,3 +22,7 @@ def role_required(*roles):
 
 def instructor_required(view_func):
     return role_required("instructor", "admin")(view_func)
+
+
+def admin_required(view_func):
+    return role_required("admin")(view_func)

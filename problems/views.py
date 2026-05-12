@@ -63,13 +63,19 @@ def problem_detail(request, slug):
 
 @instructor_required
 def problem_manage(request):
-    problems = Problem.objects.all().order_by("topic", "title")
+    problems = Problem.objects.select_related("created_by").all().order_by("topic", "title")
+    if not request.user.profile.is_admin_like:
+        problems = problems.filter(created_by=request.user)
     return render(request, "problems/problem_manage.html", {"problems": problems})
 
 
 @instructor_required
 def problem_edit(request, pk=None):
-    problem = get_object_or_404(Problem, pk=pk) if pk else None
+    if pk:
+        queryset = Problem.objects.all() if request.user.profile.is_admin_like else Problem.objects.filter(created_by=request.user)
+        problem = get_object_or_404(queryset, pk=pk)
+    else:
+        problem = None
     if request.method == "POST":
         form = ProblemForm(request.POST, instance=problem)
         if form.is_valid():

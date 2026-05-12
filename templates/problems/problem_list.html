@@ -1,22 +1,36 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-  <h1 class="text-3xl font-bold">Coding Practice</h1>
-  {% if user.profile.is_instructor_like %}<a class="btn" href="{% url 'problem_manage' %}">Manage Problems</a>{% endif %}
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">Practice lab</p>
+    <h1>Coding Problems</h1>
+    <p>Choose a topic, solve the prompt, and build a stronger coding streak.</p>
+  </div>
+  {% if user.profile.is_instructor_like %}<a class="btn" href="{% url 'problem_manage' %}">Manage problems</a>{% endif %}
 </div>
-<form method="get" class="card mb-4 grid gap-3 md:grid-cols-3">
+<form method="get" class="filter-bar">
   <select name="topic"><option value="">All topics</option>{% for value,label in topics %}<option value="{{ value }}">{{ label }}</option>{% endfor %}</select>
   <select name="difficulty"><option value="">All difficulties</option>{% for value,label in difficulties %}<option value="{{ value }}">{{ label }}</option>{% endfor %}</select>
   <button type="submit">Filter</button>
 </form>
-<section class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+<section class="content-grid">
   {% for problem in problems %}
-    <article class="card">
-      <div class="mb-2 flex justify-between gap-2"><h2 class="font-semibold">{{ problem.title }}</h2><span class="text-sm">{{ problem.get_difficulty_display }}</span></div>
-      <p class="text-sm text-slate-600">{{ problem.get_topic_display }} · {{ problem.points }} pts</p>
-      {% if problem.id in solved_ids %}<p class="mt-2 text-sm font-semibold text-teal-700">Solved</p>{% endif %}
-      <a class="mt-3 inline-block" href="{% url 'problem_detail' problem.slug %}">Open problem</a>
+    <article class="practice-card">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <span class="status-pill">{{ problem.get_difficulty_display }}</span>
+          <h2>{{ problem.title }}</h2>
+        </div>
+        {% if problem.id in solved_ids %}<span class="status-pill good">Solved</span>{% endif %}
+      </div>
+      <p>{{ problem.get_topic_display }} · {{ problem.points }} points</p>
+      <div class="mt-4 flex items-center justify-between">
+        <span class="text-sm text-slate-500">{{ problem.submissions.count }} submissions</span>
+        <a href="{% url 'problem_detail' problem.slug %}">Open problem</a>
+      </div>
     </article>
-  {% empty %}<p>No problems match your filters.</p>{% endfor %}
+  {% empty %}
+    <div class="empty-state">No problems match your filters.</div>
+  {% endfor %}
 </section>
 {% endblock %}

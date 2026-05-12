@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">Admin controls</p>
+    <h1>User Roles</h1>
+    <p>Promote students to instructors, grant admin access, and manage account status.</p>
+  </div>
+</div>
+<div class="card overflow-x-auto">
+  <table class="data-table">
+    <thead>
+      <tr><th>Name</th><th>Username</th><th>Role</th><th>Section</th><th>Status</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for item in users %}
+        <tr>
+          <td>{{ item.get_full_name|default:item.username }}</td>
+          <td>{{ item.username }}</td>
+          <td><span class="status-pill">{{ item.profile.get_role_display }}</span></td>
+          <td>{{ item.profile.display_section|default:"-" }}</td>
+          <td>{% if item.is_active %}Active{% else %}Disabled{% endif %}</td>
+          <td><a href="{% url 'user_role_edit' item.pk %}">Edit role</a></td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="6">No accounts found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

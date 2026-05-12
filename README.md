@@ -77,9 +77,13 @@ CodeTrack AI is a Django 4.2 web application for tracking coding progress, pract
    Demo instructor login:
 
    ```text
+   admin username: codetrack_admin
+   admin password: AdminChangeMe123!
    username: instructor
    password: ChangeMe123!
    ```
+
+   The app admin can open `Users` in the navigation to promote a student account to Instructor or Admin.
 
 8. Run the development server:
 

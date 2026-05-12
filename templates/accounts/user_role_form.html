@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="mx-auto max-w-2xl card elevated">
+  <p class="eyebrow">Admin controls</p>
+  <h1 class="mb-2 text-3xl font-black">Update {{ target.username }}</h1>
+  <p class="mb-5 text-slate-600">Change account details, role, and staff access.</p>
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div class="flex gap-3">
+      <button type="submit">Save account</button>
+      <a class="btn secondary" href="{% url 'user_manage' %}">Cancel</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

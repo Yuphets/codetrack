@@ -1,13 +1,27 @@
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
+from accounts.models import Section
 from problems.models import Achievement, Problem
 from quizzes.models import Question, Quiz
 
 
 class Command(BaseCommand):
-    help = "Seed CodeTrack AI with sample problems, quizzes, achievements, and instructor account."
+    help = "Seed CodeTrack AI with sample accounts, sections, problems, quizzes, and achievements."
 
     def handle(self, *args, **options):
+        admin, created = User.objects.get_or_create(
+            username="codetrack_admin",
+            defaults={"email": "admin@example.com", "first_name": "CodeTrack", "last_name": "Admin", "is_staff": True, "is_superuser": True},
+        )
+        if created:
+            admin.set_password("AdminChangeMe123!")
+            admin.save()
+        admin.is_staff = True
+        admin.is_superuser = True
+        admin.profile.role = "admin"
+        admin.profile.save()
+        admin.save()
+
         instructor, created = User.objects.get_or_create(
             username="instructor",
             defaults={"email": "instructor@example.com", "first_name": "CodeTrack", "last_name": "Instructor", "is_staff": True},
@@ -17,6 +31,12 @@ class Command(BaseCommand):
             instructor.save()
         instructor.profile.role = "instructor"
         instructor.profile.save()
+
+        Section.objects.get_or_create(
+            instructor=instructor,
+            code="bscs-1a",
+            defaults={"name": "BSCS 1A", "description": "Default first-year programming section."},
+        )
 
         achievements = [
             ("problem-solver", "Problem Solver", "Solved your first coding problem.", "award", 1),
@@ -75,4 +95,4 @@ class Command(BaseCommand):
             prompt="What is the result of len([1, 2, 3])?",
             defaults={"choice_a": "2", "choice_b": "3", "choice_c": "4", "choice_d": "Error", "correct_choice": "B", "explanation": "The list contains three items."},
         )
-        self.stdout.write(self.style.SUCCESS("Demo data seeded. Instructor login: instructor / ChangeMe123!"))
+        self.stdout.write(self.style.SUCCESS("Demo data seeded. Admin login: codetrack_admin / AdminChangeMe123! Instructor login: instructor / ChangeMe123!"))

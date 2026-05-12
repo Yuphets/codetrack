@@ -1,35 +1,73 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="grid gap-6 lg:grid-cols-2">
-  <section class="card">
-    <h1 class="text-3xl font-bold">{{ problem.title }}</h1>
-    <p class="mb-4 text-sm text-slate-600">{{ problem.get_topic_display }} · {{ problem.get_difficulty_display }} · {{ problem.points }} pts</p>
-    <div class="prose max-w-none whitespace-pre-wrap">{{ problem.statement }}</div>
-    {% if problem.input_format %}<h2 class="mt-4 font-semibold">Input</h2><p class="whitespace-pre-wrap">{{ problem.input_format }}</p>{% endif %}
-    {% if problem.output_format %}<h2 class="mt-4 font-semibold">Output</h2><p class="whitespace-pre-wrap">{{ problem.output_format }}</p>{% endif %}
-    <div class="mt-4 grid gap-3 md:grid-cols-2">
-      <pre class="rounded bg-slate-100 p-3 text-sm">{{ problem.sample_input }}</pre>
-      <pre class="rounded bg-slate-100 p-3 text-sm">{{ problem.sample_output }}</pre>
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">Coding challenge</p>
+    <h1>{{ problem.title }}</h1>
+    <p>{{ problem.get_topic_display }} · {{ problem.get_difficulty_display }} · {{ problem.points }} points</p>
+  </div>
+  <a class="btn secondary" href="{% url 'problem_list' %}">Back to problems</a>
+</div>
+<div class="grid gap-6 lg:grid-cols-[.9fr_1.1fr]">
+  <section class="card elevated">
+    <div class="mb-5 flex flex-wrap gap-2">
+      <span class="status-pill">{{ problem.get_topic_display }}</span>
+      <span class="status-pill">{{ problem.get_difficulty_display }}</span>
+      <span class="status-pill good">{{ problem.points }} pts</span>
+    </div>
+    <div class="whitespace-pre-wrap leading-7 text-slate-700">{{ problem.statement }}</div>
+    <div class="mt-6 grid gap-4">
+      {% if problem.input_format %}
+        <div>
+          <h2 class="mb-2 font-black">Input format</h2>
+          <p class="whitespace-pre-wrap text-slate-600">{{ problem.input_format }}</p>
+        </div>
+      {% endif %}
+      {% if problem.output_format %}
+        <div>
+          <h2 class="mb-2 font-black">Output format</h2>
+          <p class="whitespace-pre-wrap text-slate-600">{{ problem.output_format }}</p>
+        </div>
+      {% endif %}
+    </div>
+    <div class="mt-6 grid gap-3 md:grid-cols-2">
+      <div>
+        <h3 class="mb-2 text-sm font-black uppercase text-slate-500">Sample input</h3>
+        <pre class="rounded-md bg-slate-100 p-3 text-sm">{{ problem.sample_input|default:"-" }}</pre>
+      </div>
+      <div>
+        <h3 class="mb-2 text-sm font-black uppercase text-slate-500">Sample output</h3>
+        <pre class="rounded-md bg-slate-100 p-3 text-sm">{{ problem.sample_output|default:"-" }}</pre>
+      </div>
     </div>
   </section>
-  <section class="card">
-    <h2 class="mb-3 text-xl font-semibold">Submit Solution</h2>
+  <section class="card elevated">
+    <h2 class="mb-1 text-2xl font-black">Submit solution</h2>
+    <p class="mb-4 text-sm text-slate-600">Paste the output your program produces. CodeTrack compares it with the expected output for this exercise.</p>
     <form method="post" onsubmit="syncEditor()">
       {% csrf_token %}
       <label for="id_language">Language</label>{{ form.language }}
       <label for="editor">Code</label>
-      <div id="editor" class="h-80 rounded border"></div>
+      <div id="editor" class="h-96 rounded-md border border-slate-300"></div>
       {{ form.code }}
       <label for="id_output">Program output</label>{{ form.output }}
-      <button class="mt-3" type="submit">Submit</button>
+      <button class="mt-4 w-full" type="submit">Submit solution</button>
     </form>
   </section>
 </div>
-<section class="card mt-6">
-  <h2 class="mb-3 text-xl font-semibold">Submission History</h2>
+<section class="card elevated mt-6">
+  <h2 class="mb-3 text-xl font-black">Submission history</h2>
   {% for submission in submissions %}
-    <div class="flex justify-between border-b py-2 text-sm"><span>{{ submission.get_language_display }} · {{ submission.get_status_display }}</span><span>{{ submission.score }} pts · {{ submission.submitted_at|date:"M d, H:i" }}</span></div>
-  {% empty %}<p>No submissions for this problem yet.</p>{% endfor %}
+    <div class="list-row">
+      <div>
+        <h3>{{ submission.get_language_display }} · {{ submission.get_status_display }}</h3>
+        <p>{{ submission.feedback }}</p>
+      </div>
+      <strong>{{ submission.score }} pts · {{ submission.submitted_at|date:"M d, H:i" }}</strong>
+    </div>
+  {% empty %}
+    <div class="empty-state">No submissions for this problem yet.</div>
+  {% endfor %}
 </section>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.6/ace.js"></script>
 <script>
@@ -38,6 +76,7 @@ textarea.style.display = "none";
 const editor = ace.edit("editor");
 editor.setTheme("ace/theme/textmate");
 editor.session.setMode("ace/mode/python");
+editor.setOptions({ fontSize: "14px", showPrintMargin: false });
 editor.setValue(textarea.value || "print('Hello CodeTrack')", -1);
 document.getElementById("id_language").addEventListener("change", (event) => {
   const modes = { python: "python", java: "java", cpp: "c_cpp", php: "php" };

@@ -1,13 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+<div class="page-heading">
   <div>
-    <h1 class="text-3xl font-bold">Instructor Dashboard</h1>
-    <p class="text-slate-600">Monitor student performance, difficult topics, and class progress.</p>
+    <p class="eyebrow">{% if user.profile.is_admin_like %}Admin overview{% else %}Instructor overview{% endif %}</p>
+    <h1>{% if user.profile.is_admin_like %}Admin Dashboard{% else %}Instructor Dashboard{% endif %}</h1>
+    <p>Monitor student performance, difficult topics, sections, and class progress.</p>
   </div>
-  <div class="flex gap-2">
-    <a class="btn" href="{% url 'problem_manage' %}">Manage Problems</a>
-    <a class="btn secondary" href="{% url 'quiz_manage' %}">Manage Quizzes</a>
+  <div class="flex flex-wrap gap-2">
+    <a class="btn" href="{% url 'problem_manage' %}">Problems</a>
+    <a class="btn secondary" href="{% url 'quiz_manage' %}">Quizzes</a>
+    <a class="btn secondary" href="{% url 'section_manage' %}">Sections</a>
+    {% if user.profile.is_admin_like %}<a class="btn secondary" href="{% url 'user_manage' %}">Users</a>{% endif %}
   </div>
 </div>
 <section class="grid gap-4 md:grid-cols-5">

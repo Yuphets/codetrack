@@ -25,8 +25,12 @@
           <a href="{% url 'leaderboard' %}">Leaderboard</a>
           <a href="{% url 'announcement_list' %}">Announcements</a>
           {% if user.profile.is_instructor_like %}
+            <a href="{% url 'section_manage' %}">Sections</a>
             <a href="{% url 'analytics_dashboard' %}">Analytics</a>
             <a href="{% url 'report_center' %}">Reports</a>
+          {% endif %}
+          {% if user.profile.is_admin_like %}
+            <a href="{% url 'user_manage' %}">Users</a>
           {% endif %}
           <a href="{% url 'profile' %}">Profile</a>
           <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="btn secondary compact">Logout</button></form>

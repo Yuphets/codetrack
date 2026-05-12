@@ -45,14 +45,22 @@ def quiz_result(request, pk):
 
 @instructor_required
 def quiz_manage(request):
-    quizzes = Quiz.objects.prefetch_related("questions")
+    quizzes = Quiz.objects.select_related("created_by").prefetch_related("questions")
+    if not request.user.profile.is_admin_like:
+        quizzes = quizzes.filter(created_by=request.user)
     questions = Question.objects.select_related("quiz")
+    if not request.user.profile.is_admin_like:
+        questions = questions.filter(quiz__created_by=request.user)
     return render(request, "quizzes/quiz_manage.html", {"quizzes": quizzes, "questions": questions})
 
 
 @instructor_required
 def quiz_edit(request, pk=None):
-    quiz = get_object_or_404(Quiz, pk=pk) if pk else None
+    if pk:
+        queryset = Quiz.objects.all() if request.user.profile.is_admin_like else Quiz.objects.filter(created_by=request.user)
+        quiz = get_object_or_404(queryset, pk=pk)
+    else:
+        quiz = None
     if request.method == "POST":
         form = QuizForm(request.POST, instance=quiz)
         if form.is_valid():
@@ -69,15 +77,21 @@ def quiz_edit(request, pk=None):
 
 @instructor_required
 def question_edit(request, pk=None):
-    question = get_object_or_404(Question, pk=pk) if pk else None
+    if pk:
+        queryset = Question.objects.select_related("quiz")
+        if not request.user.profile.is_admin_like:
+            queryset = queryset.filter(quiz__created_by=request.user)
+        question = get_object_or_404(queryset, pk=pk)
+    else:
+        question = None
     if request.method == "POST":
-        form = QuestionForm(request.POST, instance=question)
+        form = QuestionForm(request.POST, instance=question, user=request.user)
         if form.is_valid():
             form.save()
             messages.success(request, "Question saved.")
             return redirect("quiz_manage")
     else:
-        form = QuestionForm(instance=question)
+        form = QuestionForm(instance=question, user=request.user)
     return render(request, "quizzes/question_form.html", {"form": form, "question": question})
 
 
