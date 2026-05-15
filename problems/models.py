@@ -42,6 +42,23 @@ class Problem(models.Model):
         return self.title
 
 
+class ProblemTestCase(models.Model):
+    problem = models.ForeignKey(Problem, on_delete=models.CASCADE, related_name="test_cases")
+    label = models.CharField(max_length=120, default="Test case")
+    input_data = models.TextField(blank=True)
+    expected_output = models.TextField()
+    explanation = models.TextField(blank=True)
+    is_hidden = models.BooleanField(default=False)
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["order", "id"]
+
+    def __str__(self):
+        visibility = "hidden" if self.is_hidden else "visible"
+        return f"{self.problem.title} - {self.label} ({visibility})"
+
+
 class Submission(models.Model):
     class Language(models.TextChoices):
         PYTHON = "python", "Python"
@@ -53,6 +70,13 @@ class Submission(models.Model):
         ACCEPTED = "accepted", "Accepted"
         WRONG_ANSWER = "wrong_answer", "Wrong Answer"
 
+    class AIStatus(models.TextChoices):
+        NOT_REQUESTED = "not_requested", "Not requested"
+        UNAVAILABLE = "unavailable", "Unavailable"
+        PASSED = "passed", "Passed"
+        NEEDS_REVIEW = "needs_review", "Needs review"
+        FAILED = "failed", "Failed"
+
     student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="submissions")
     problem = models.ForeignKey(Problem, on_delete=models.CASCADE, related_name="submissions")
     language = models.CharField(max_length=20, choices=Language.choices)
@@ -61,6 +85,10 @@ class Submission(models.Model):
     status = models.CharField(max_length=20, choices=Status.choices)
     score = models.PositiveIntegerField(default=0)
     feedback = models.TextField(blank=True)
+    ai_status = models.CharField(max_length=20, choices=AIStatus.choices, default=AIStatus.NOT_REQUESTED)
+    ai_score = models.PositiveIntegerField(null=True, blank=True)
+    ai_feedback = models.TextField(blank=True)
+    ai_test_results = models.JSONField(default=list, blank=True)
     submitted_at = models.DateTimeField(default=timezone.now)
 
     class Meta:

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Answer, Question, Quiz, QuizAttempt
+from .models import Answer, Question, Quiz, QuizAttempt, QuizRetakePermission
 
 
 class QuestionInline(admin.TabularInline):
@@ -22,3 +22,4 @@ class QuizAttemptAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Answer)
+admin.site.register(QuizRetakePermission)

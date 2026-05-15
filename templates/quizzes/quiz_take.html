@@ -6,6 +6,7 @@
       <p class="eyebrow">Assessment</p>
       <h1>{{ quiz.title }}</h1>
       <p>{{ quiz.description }}</p>
+      {% if is_retake %}<p class="mt-2 font-bold text-teal-700">This quiz has been reopened for one additional attempt.</p>{% endif %}
     </div>
     <span class="status-pill good">{{ questions|length }} questions</span>
   </div>

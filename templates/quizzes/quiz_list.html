@@ -16,7 +16,13 @@
       <p>{{ quiz.description|default:"No description provided." }}</p>
       <div class="mt-4 flex items-center justify-between">
         <span class="text-sm text-slate-500">{{ quiz.questions.count }} questions</span>
-        <a href="{% url 'quiz_take' quiz.pk %}">Take quiz</a>
+        {% if quiz.id in attempted_quiz_ids and quiz.id not in retake_quiz_ids %}
+          <span class="status-pill">Completed</span>
+        {% elif quiz.id in retake_quiz_ids %}
+          <a href="{% url 'quiz_take' quiz.pk %}">Retake quiz</a>
+        {% else %}
+          <a href="{% url 'quiz_take' quiz.pk %}">Take quiz</a>
+        {% endif %}
       </div>
     </article>
   {% empty %}

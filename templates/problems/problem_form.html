@@ -1,11 +1,43 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="mx-auto max-w-3xl card">
-  <h1 class="mb-4 text-2xl font-bold">{% if problem %}Edit{% else %}New{% endif %} Problem</h1>
-  <form method="post">
-    {% csrf_token %}
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">Instructor workspace</p>
+    <h1>{% if problem %}Edit{% else %}New{% endif %} Problem</h1>
+    <p>Define the prompt, expected output, and instructor test cases that AI will use for review.</p>
+  </div>
+  <a class="btn secondary" href="{% url 'problem_manage' %}">Back</a>
+</div>
+<form method="post" class="grid gap-6 lg:grid-cols-[1fr_.95fr]">
+  {% csrf_token %}
+  <section class="card elevated">
+    <h2 class="mb-4 text-xl font-black">Problem details</h2>
     {{ form.as_p }}
-    <button type="submit">Save problem</button>
-  </form>
-</section>
+  </section>
+  <section class="card elevated">
+    <h2 class="mb-1 text-xl font-black">Instructor test cases</h2>
+    <p class="mb-4 text-sm text-slate-600">Add visible and hidden cases. AI uses these to review whether student code matches your expected behavior.</p>
+    {{ formset.management_form }}
+    <div class="grid gap-4">
+      {% for case_form in formset %}
+        <div class="rounded-md border border-slate-200 bg-slate-50 p-4">
+          {% for hidden in case_form.hidden_fields %}{{ hidden }}{% endfor %}
+          <div class="grid gap-3 md:grid-cols-2">
+            <div>{{ case_form.label.label_tag }}{{ case_form.label }}</div>
+            <div>{{ case_form.order.label_tag }}{{ case_form.order }}</div>
+          </div>
+          <div>{{ case_form.input_data.label_tag }}{{ case_form.input_data }}</div>
+          <div>{{ case_form.expected_output.label_tag }}{{ case_form.expected_output }}</div>
+          <div>{{ case_form.explanation.label_tag }}{{ case_form.explanation }}</div>
+          <div class="mt-3 flex items-center gap-4">
+            <label class="m-0 flex items-center gap-2">{{ case_form.is_hidden }} Hidden test</label>
+            {% if case_form.instance.pk %}<label class="m-0 flex items-center gap-2">{{ case_form.DELETE }} Delete</label>{% endif %}
+          </div>
+          {% if case_form.errors %}<div class="form-error mt-3">{{ case_form.errors }}</div>{% endif %}
+        </div>
+      {% endfor %}
+    </div>
+    <button class="mt-5 w-full" type="submit">Save problem and test cases</button>
+  </section>
+</form>
 {% endblock %}

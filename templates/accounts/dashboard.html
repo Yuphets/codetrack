@@ -40,7 +40,10 @@
   <div class="card">
     <h2 class="mb-3 text-xl font-semibold">Top Students</h2>
     {% for leader in leaders %}
-      <div class="flex justify-between border-b py-2"><span>{{ forloop.counter }}. {{ leader.get_full_name|default:leader.username }}</span><strong>{{ leader.score|default:0 }} pts</strong></div>
+      <div class="flex justify-between border-b py-2">
+        <span>{{ forloop.counter }}. {{ leader.public_name }}</span>
+        <strong>{% if leader.quiz_percentage != None and leader.show_quiz_percentage %}{{ leader.quiz_percentage }}%{% else %}{{ leader.coding_score }} pts{% endif %}</strong>
+      </div>
     {% endfor %}
   </div>
 </section>

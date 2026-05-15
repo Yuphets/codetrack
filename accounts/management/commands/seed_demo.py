@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
 from accounts.models import Section
-from problems.models import Achievement, Problem
+from problems.models import Achievement, Problem, ProblemTestCase
 from quizzes.models import Question, Quiz
 
 
@@ -82,7 +82,17 @@ class Command(BaseCommand):
             },
         ]
         for data in problems:
-            Problem.objects.get_or_create(slug=data["slug"], defaults={**data, "created_by": instructor})
+            problem, _ = Problem.objects.get_or_create(slug=data["slug"], defaults={**data, "created_by": instructor})
+            ProblemTestCase.objects.get_or_create(
+                problem=problem,
+                label="Sample case",
+                defaults={
+                    "input_data": data.get("sample_input", ""),
+                    "expected_output": data.get("expected_output", ""),
+                    "explanation": "Starter test case created from the sample output.",
+                    "order": 1,
+                },
+            )
 
         quiz, _ = Quiz.objects.get_or_create(title="Python Basics", defaults={"topic": "Python", "description": "Core syntax and control-flow checks.", "created_by": instructor})
         Question.objects.get_or_create(

@@ -1,8 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="mx-auto max-w-3xl card">
-  <h1 class="text-3xl font-bold">{{ attempt.quiz.title }} Result</h1>
+<section class="mx-auto max-w-3xl card elevated">
+  <p class="eyebrow">Quiz result</p>
+  <h1 class="text-3xl font-black">{{ attempt.quiz.title }}</h1>
   <p class="mb-4 text-xl">Score: {{ attempt.score }}/{{ attempt.total }} ({{ attempt.percentage }}%)</p>
+  {% if attempt.student == user %}
+    <p class="mb-4 rounded-md border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600">This quiz is now locked. Your instructor can reopen it if another attempt is needed.</p>
+  {% endif %}
   {% for answer in attempt.answers.all %}
     <article class="mb-4 rounded border p-3">
       <h2 class="font-semibold">{{ answer.question.prompt }}</h2>

@@ -1,6 +1,6 @@
 from datetime import timedelta
 from django.contrib.auth.models import User
-from django.db.models import Avg, Count, Max, Q, Sum
+from django.db.models import Count, Max, Q, Sum
 from django.utils import timezone
 from problems.models import Achievement, StudentAchievement, Submission
 
@@ -67,9 +67,46 @@ def student_metrics(student):
 
 
 def leaderboard(limit=20):
-    students = User.objects.filter(profile__role="student").annotate(
-        solved=Count("submissions__problem", filter=Q(submissions__status="accepted"), distinct=True),
-        score=Sum("submissions__score", filter=Q(submissions__status="accepted")),
-        quiz_average=Avg("quiz_attempts__score"),
+    students = (
+        User.objects.filter(profile__role="student")
+        .select_related("profile", "profile__section_ref")
+        .prefetch_related("quiz_attempts")
+        .annotate(
+            solved=Count("submissions__problem", filter=Q(submissions__status="accepted"), distinct=True),
+            coding_score=Sum("submissions__score", filter=Q(submissions__status="accepted")),
+        )
     )
-    return students.order_by("-score", "-solved", "username")[:limit]
+    rows = []
+    for student in students:
+        attempts = list(student.quiz_attempts.all())
+        quiz_score = sum(attempt.score for attempt in attempts)
+        quiz_total = sum(attempt.total for attempt in attempts)
+        quiz_percentage = round((quiz_score / quiz_total) * 100, 1) if quiz_total else None
+        profile = student.profile
+        public_name = profile.leaderboard_alias.strip()
+        if not public_name:
+            public_name = student.get_full_name() or student.username if profile.show_real_name_on_leaderboard else "Anonymous Student"
+        rows.append(
+            {
+                "user": student,
+                "public_name": public_name,
+                "section": profile.display_section,
+                "solved": student.solved or 0,
+                "coding_score": student.coding_score or 0,
+                "quiz_attempts": len(attempts),
+                "quiz_percentage": quiz_percentage,
+                "show_quiz_percentage": profile.show_quiz_percentage_on_leaderboard,
+            }
+        )
+    rows.sort(
+        key=lambda row: (
+            row["quiz_percentage"] if row["quiz_percentage"] is not None else -1,
+            row["coding_score"],
+            row["solved"],
+        ),
+        reverse=True,
+    )
+    for index, row in enumerate(rows, start=1):
+        if row["public_name"] == "Anonymous Student":
+            row["public_name"] = f"Anonymous Student #{index}"
+    return rows[:limit]

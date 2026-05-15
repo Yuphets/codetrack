@@ -50,6 +50,26 @@ class QuizAttempt(models.Model):
         return round((self.score / self.total) * 100, 2) if self.total else 0
 
 
+class QuizRetakePermission(models.Model):
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="retake_permissions")
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="quiz_retake_permissions")
+    granted_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="granted_quiz_retakes")
+    reason = models.CharField(max_length=255, blank=True)
+    used_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [models.Index(fields=["quiz", "student", "used_at"])]
+
+    @property
+    def is_available(self):
+        return self.used_at is None
+
+    def __str__(self):
+        return f"{self.student} retake for {self.quiz}"
+
+
 class Answer(models.Model):
     attempt = models.ForeignKey(QuizAttempt, on_delete=models.CASCADE, related_name="answers")
     question = models.ForeignKey(Question, on_delete=models.CASCADE)

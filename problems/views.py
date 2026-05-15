@@ -6,7 +6,8 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from accounts.decorators import instructor_required
 from accounts.services import award_achievements, grade_submission
-from .forms import ProblemForm, SubmissionForm
+from .ai_grading import request_ai_review
+from .forms import ProblemForm, ProblemTestCaseFormSet, SubmissionForm
 from .models import Problem, Submission
 
 logger = logging.getLogger(__name__)
@@ -42,6 +43,7 @@ def problem_detail(request, slug):
             submission.problem = problem
             submission.status, submission.score, submission.feedback = grade_submission(problem, submission.output)
             try:
+                apply_ai_review(submission)
                 submission.save()
                 if submission.status == Submission.Status.ACCEPTED:
                     award_achievements(request.user)
@@ -78,16 +80,20 @@ def problem_edit(request, pk=None):
         problem = None
     if request.method == "POST":
         form = ProblemForm(request.POST, instance=problem)
-        if form.is_valid():
+        formset = ProblemTestCaseFormSet(request.POST, instance=problem)
+        if form.is_valid() and formset.is_valid():
             item = form.save(commit=False)
             if not item.created_by_id:
                 item.created_by = request.user
             item.save()
+            formset.instance = item
+            formset.save()
             messages.success(request, "Problem saved.")
             return redirect("problem_manage")
     else:
         form = ProblemForm(instance=problem)
-    return render(request, "problems/problem_form.html", {"form": form, "problem": problem})
+        formset = ProblemTestCaseFormSet(instance=problem)
+    return render(request, "problems/problem_form.html", {"form": form, "formset": formset, "problem": problem})
 
 
 @login_required
@@ -104,7 +110,7 @@ def submit_api(request, slug):
         return JsonResponse({"error": "Code is required."}, status=400)
     status, score, feedback = grade_submission(problem, output)
     try:
-        submission = Submission.objects.create(
+        submission = Submission(
             student=request.user,
             problem=problem,
             language=language,
@@ -114,8 +120,42 @@ def submit_api(request, slug):
             score=score,
             feedback=feedback,
         )
+        apply_ai_review(submission)
+        submission.save()
     except IntegrityError:
         return JsonResponse({"error": "This accepted solution is already recorded."}, status=409)
     if status == Submission.Status.ACCEPTED:
         award_achievements(request.user)
-    return JsonResponse({"id": submission.id, "status": status, "score": score, "feedback": feedback})
+    return JsonResponse({
+        "id": submission.id,
+        "status": submission.status,
+        "score": submission.score,
+        "feedback": submission.feedback,
+        "ai_status": submission.ai_status,
+        "ai_score": submission.ai_score,
+        "ai_feedback": submission.ai_feedback,
+        "ai_test_results": submission.ai_test_results,
+    })
+
+
+def apply_ai_review(submission):
+    review = request_ai_review(submission)
+    submission.ai_status = review["status"]
+    submission.ai_score = review["score"]
+    tips = review.get("tips") or []
+    tip_text = "\n".join(f"- {tip}" for tip in tips)
+    submission.ai_feedback = review["summary"] + (f"\n\nImprovement tips:\n{tip_text}" if tip_text else "")
+    submission.ai_test_results = review["test_results"]
+    if review["available"]:
+        if submission.ai_status == Submission.AIStatus.PASSED:
+            submission.status = Submission.Status.ACCEPTED
+            submission.score = submission.problem.points
+            submission.feedback = "Accepted by AI review. The submitted code appears to satisfy the instructor test cases."
+        elif submission.ai_status == Submission.AIStatus.FAILED:
+            submission.status = Submission.Status.WRONG_ANSWER
+            submission.score = 0
+            submission.feedback = "AI review found issues against the instructor test cases."
+        else:
+            submission.status = Submission.Status.WRONG_ANSWER
+            submission.score = 0
+            submission.feedback = "AI review could not confidently accept this solution. Please review the feedback."

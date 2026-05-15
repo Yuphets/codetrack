@@ -1,5 +1,6 @@
 from django import forms
-from .models import Problem, Submission
+from django.forms import inlineformset_factory
+from .models import Problem, ProblemTestCase, Submission
 
 
 class ProblemForm(forms.ModelForm):
@@ -29,3 +30,17 @@ class SubmissionForm(forms.ModelForm):
             "code": forms.Textarea(attrs={"id": "code-field"}),
             "output": forms.Textarea(attrs={"rows": 5}),
         }
+
+
+ProblemTestCaseFormSet = inlineformset_factory(
+    Problem,
+    ProblemTestCase,
+    fields=("label", "input_data", "expected_output", "explanation", "is_hidden", "order"),
+    extra=2,
+    can_delete=True,
+    widgets={
+        "input_data": forms.Textarea(attrs={"rows": 3}),
+        "expected_output": forms.Textarea(attrs={"rows": 3}),
+        "explanation": forms.Textarea(attrs={"rows": 2}),
+    },
+)

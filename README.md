@@ -123,6 +123,9 @@ CodeTrack AI is a Django 4.2 web application for tracking coding progress, pract
    DATABASE_URL=<your Neon pooled connection string with sslmode=require>
    DB_CONN_MAX_AGE=0
    DB_CONN_HEALTH_CHECKS=True
+   OPENAI_API_KEY=<your OpenAI API key>
+   OPENAI_MODEL=gpt-4.1-mini
+   AI_GRADING_ENABLED=True
    ```
 
    The app automatically accepts Vercel-provided `VERCEL_URL`, `VERCEL_BRANCH_URL`, and `VERCEL_PROJECT_PRODUCTION_URL`, but keeping your production domain in `ALLOWED_HOSTS` is still recommended.
@@ -155,6 +158,20 @@ CodeTrack AI is a Django 4.2 web application for tracking coding progress, pract
    ```
 
    If Vercel says it failed to read Django settings from `manage.py`, verify that this code change is deployed and that `.env` / `db.sqlite3` are not tracked in git. If `/healthz/` returns `misconfigured`, Vercel is missing `DATABASE_URL` or `POSTGRES_URL`.
+
+## AI Grading
+
+Instructors can add test cases to coding problems. When a student submits code, CodeTrack first keeps the existing output comparison as a deterministic fallback, then asks the AI grader to review the code against the instructor test cases if `OPENAI_API_KEY` is configured.
+
+Set these in Vercel to enable AI review:
+
+```env
+OPENAI_API_KEY=<your OpenAI API key>
+OPENAI_MODEL=gpt-4.1-mini
+AI_GRADING_ENABLED=True
+```
+
+The AI reviewer does not execute untrusted student code. It inspects the code, problem statement, and instructor test cases, then returns a structured verdict, score, per-case notes, and improvement tips.
 
 4. Serve with a WSGI server such as Gunicorn:
 

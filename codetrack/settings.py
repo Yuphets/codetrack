@@ -61,6 +61,9 @@ CSRF_TRUSTED_ORIGINS = sorted(
         + [f"https://{host}" for host in ALLOWED_HOSTS if host.endswith(".vercel.app")]
     )
 )
+OPENAI_API_KEY = config("OPENAI_API_KEY", default="")
+OPENAI_MODEL = config("OPENAI_MODEL", default="gpt-4.1-mini")
+AI_GRADING_ENABLED = config("AI_GRADING_ENABLED", default=bool(OPENAI_API_KEY), cast=env_bool)
 
 INSTALLED_APPS = [
     'django.contrib.admin',

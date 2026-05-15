@@ -47,7 +47,14 @@ class ProfileForm(forms.ModelForm):
 
     class Meta:
         model = Profile
-        fields = ("student_id", "section_ref", "bio")
+        fields = (
+            "student_id",
+            "section_ref",
+            "leaderboard_alias",
+            "show_real_name_on_leaderboard",
+            "show_quiz_percentage_on_leaderboard",
+            "bio",
+        )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

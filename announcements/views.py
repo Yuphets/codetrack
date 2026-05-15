@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
-from accounts.decorators import instructor_required
+from accounts.decorators import admin_required
 from .forms import AnnouncementForm
 from .models import Announcement
 
@@ -14,13 +14,13 @@ def announcement_list(request):
     return render(request, "announcements/announcement_list.html", {"announcements": announcements})
 
 
-@instructor_required
+@admin_required
 def announcement_manage(request):
     announcements = Announcement.objects.all()
     return render(request, "announcements/announcement_manage.html", {"announcements": announcements})
 
 
-@instructor_required
+@admin_required
 def announcement_edit(request, pk=None):
     announcement = get_object_or_404(Announcement, pk=pk) if pk else None
     if request.method == "POST":

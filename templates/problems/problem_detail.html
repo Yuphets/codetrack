@@ -40,10 +40,28 @@
         <pre class="rounded-md bg-slate-100 p-3 text-sm">{{ problem.sample_output|default:"-" }}</pre>
       </div>
     </div>
+    {% if problem.test_cases.all %}
+      <div class="mt-6">
+        <h2 class="mb-2 font-black">Visible test cases</h2>
+        <div class="grid gap-3">
+          {% for case in problem.test_cases.all %}
+            {% if not case.is_hidden %}
+              <div class="rounded-md border border-slate-200 p-3">
+                <strong>{{ case.label }}</strong>
+                <div class="mt-2 grid gap-2 md:grid-cols-2">
+                  <pre class="rounded bg-slate-100 p-2 text-xs">{{ case.input_data|default:"No input" }}</pre>
+                  <pre class="rounded bg-slate-100 p-2 text-xs">{{ case.expected_output }}</pre>
+                </div>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
   </section>
   <section class="card elevated">
     <h2 class="mb-1 text-2xl font-black">Submit solution</h2>
-    <p class="mb-4 text-sm text-slate-600">Paste the output your program produces. CodeTrack compares it with the expected output for this exercise.</p>
+    <p class="mb-4 text-sm text-slate-600">Write your solution and paste the output your program produces. If AI grading is configured, CodeTrack AI reviews your code against the instructor test cases.</p>
     <form method="post" onsubmit="syncEditor()">
       {% csrf_token %}
       <label for="id_language">Language</label>{{ form.language }}
@@ -62,6 +80,22 @@
       <div>
         <h3>{{ submission.get_language_display }} · {{ submission.get_status_display }}</h3>
         <p>{{ submission.feedback }}</p>
+        {% if submission.ai_status != "not_requested" %}
+          <div class="mt-3 rounded-md border border-slate-200 bg-slate-50 p-3">
+            <p class="text-sm font-black text-slate-700">AI review: {{ submission.get_ai_status_display }}{% if submission.ai_score != None %} · {{ submission.ai_score }}/100{% endif %}</p>
+            {% if submission.ai_feedback %}<p class="mt-2 whitespace-pre-wrap text-sm text-slate-600">{{ submission.ai_feedback }}</p>{% endif %}
+            {% if submission.ai_test_results %}
+              <div class="mt-3 grid gap-2">
+                {% for result in submission.ai_test_results %}
+                  <div class="flex justify-between gap-3 rounded bg-white p-2 text-sm">
+                    <span>{{ result.label }}</span>
+                    <strong>{% if result.passed %}Passed{% else %}Needs work{% endif %}</strong>
+                  </div>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+        {% endif %}
       </div>
       <strong>{{ submission.score }} pts · {{ submission.submitted_at|date:"M d, H:i" }}</strong>
     </div>

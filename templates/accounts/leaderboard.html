@@ -1,12 +1,44 @@
 {% extends "base.html" %}
 {% block content %}
-<h1 class="mb-4 text-3xl font-bold">Leaderboard</h1>
-<div class="card overflow-x-auto">
-  <table class="w-full text-sm">
-    <tr class="border-b text-left"><th>Rank</th><th>Student</th><th>Solved</th><th>Score</th></tr>
-    {% for leader in leaders %}
-      <tr class="border-b"><td>{{ forloop.counter }}</td><td>{{ leader.get_full_name|default:leader.username }}</td><td>{{ leader.solved }}</td><td>{{ leader.score|default:0 }}</td></tr>
-    {% empty %}<tr><td colspan="4" class="py-3">No leaderboard data yet.</td></tr>{% endfor %}
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">Class standings</p>
+    <h1>Leaderboard</h1>
+    <p>Quiz percentages use earned quiz points divided by total possible quiz points. Students can choose whether to show their name and percentage.</p>
+  </div>
+</div>
+<div class="card elevated overflow-x-auto">
+  <table class="data-table">
+    <thead>
+      <tr><th>Rank</th><th>Student</th><th>Section</th><th>Quiz %</th><th>Quiz Attempts</th><th>Problems Solved</th><th>Coding Score</th></tr>
+    </thead>
+    <tbody>
+      {% for leader in leaders %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ leader.public_name }}</td>
+          <td>{{ leader.section|default:"-" }}</td>
+          <td>
+            {% if leader.quiz_percentage == None %}
+              No quizzes
+            {% elif leader.show_quiz_percentage %}
+              {{ leader.quiz_percentage }}%
+            {% else %}
+              Hidden
+            {% endif %}
+          </td>
+          <td>{{ leader.quiz_attempts }}</td>
+          <td>{{ leader.solved }}</td>
+          <td>{{ leader.coding_score }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="7">No leaderboard data yet.</td></tr>
+      {% endfor %}
+    </tbody>
   </table>
 </div>
+<section class="card mt-4">
+  <h2 class="text-lg font-black">Privacy controls</h2>
+  <p class="mt-2 text-sm text-slate-600">Students can update leaderboard alias, real-name visibility, and quiz percentage visibility from Profile.</p>
+</section>
 {% endblock %}

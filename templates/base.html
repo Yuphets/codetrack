@@ -31,6 +31,7 @@
           {% endif %}
           {% if user.profile.is_admin_like %}
             <a href="{% url 'user_manage' %}">Users</a>
+            <a href="{% url 'announcement_manage' %}">Manage Announcements</a>
           {% endif %}
           <a href="{% url 'profile' %}">Profile</a>
           <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="btn secondary compact">Logout</button></form>
